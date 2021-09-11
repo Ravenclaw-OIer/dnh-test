@@ -42,7 +42,7 @@ int ind = 0;
   if (frame > 60) { // We have finished moving
     if (frame % 15 == 0) {
       if (frame % 600 != 0)
-        Fire(ind);
+        TFire(ind);
       else {
         DeleteShotAll(TYPE_ALL, TYPE_FADE);
         ind++;
@@ -54,27 +54,27 @@ int ind = 0;
 }
 
 
-task Fire(ind) {
+task TFire(ind) {
   if (ObjEnemy_GetInfo(objBoss, INFO_LIFE) <= 0) {
     return;
   }
   for (int angle = -70; angle <= 70; angle += 20) {
     let objBullet = CreateShotA1(2, GetCenterY(), 2, angle, (DS_RICE_S_RED) + ind % 8, 0);
-    Rebound(objBullet);
+    TRebound(objBullet);
   }
   for (int angle = 20; angle <= 160; angle += 20) {
     let objBullet = CreateShotA1(GetCenterX(), 2, 2, angle, DS_RICE_S_RED + ind % 8, 0);
-    Rebound(objBullet);
+    TRebound(objBullet);
   }
   CreateShotA1(ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 2, GetAngleToPlayer(objBoss), DS_BALL_S_RED, 0);
   for (int angle = 110; angle <= 250; angle += 20) {
     let objBullet = CreateShotA1(GetStgFrameWidth() - 2, GetCenterY(), 2, angle, DS_RICE_S_RED + ind % 8, 0);
-    Rebound(objBullet);
+    TRebound(objBullet);
   }
 }
 
 
-task Rebound(bullet) {
+task TRebound(bullet) {
   if (Obj_GetValueD(bullet, "rebounded", false)) return;
   while (!GetTouchedEdge(ObjMove_GetX(bullet), ObjMove_GetY(bullet))) yield;
   let edgeID = GetTouchedEdge(ObjMove_GetX(bullet), ObjMove_GetY(bullet));
