@@ -1,0 +1,116 @@
+#TouhouDanmakufu[Single]
+#ScriptVersion[3]
+#Title["Nonspell 1"]
+#Text["Nonspell 1"]
+#include "script/default_system/Default_ShotConst.txt"
+let objBoss;
+let frame = 0;
+
+
+@Event{
+  alternative (GetEventType())
+    case (EV_REQUEST_LIFE) {
+      SetScriptResult(500);
+    }
+    case (EV_REQUEST_TIMER) {
+      SetScriptResult(60);
+    }
+    case (EV_REQUEST_SPELL_SCORE) {
+      SetScriptResult(1000000);
+    }
+
+}
+
+
+@Initialize{
+  objBoss = ObjEnemy_Create(OBJ_ENEMY_BOSS);
+  ObjEnemy_Regist(objBoss);
+  let imgExRumia = GetCurrentScriptDirectory() ~ "ExRumia.png";
+  ObjPrim_SetTexture(objBoss, imgExRumia);
+  ObjSprite2D_SetSourceRect(objBoss, 64, 1, 127, 64);
+  ObjSprite2D_SetDestCenter(objBoss);
+  ObjMove_SetDestAtFrame(objBoss, GetCenterX(), 60, 60);
+
+  TFinalize;
+}
+
+int ind = 0;
+@MainLoop{
+  ObjEnemy_SetIntersectionCircleToPlayer(objBoss, ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 24);
+  ObjEnemy_SetIntersectionCircleToShot(objBoss, ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 32);
+
+  if (frame > 60) { // We have finished moving
+    if (frame % 15 == 0) {
+      if (frame % 600 != 0)
+        Fire(ind);
+      else {
+        DeleteShotAll(TYPE_ALL, TYPE_FADE);
+        ind++;
+      }
+    }
+  }
+  frame++;
+  yield;
+}
+
+
+task Fire(ind) {
+  if (ObjEnemy_GetInfo(objBoss, INFO_LIFE) <= 0) {
+    return;
+  }
+  for (int angle = -70; angle <= 70; angle += 20) {
+    let objBullet = CreateShotA1(2, GetCenterY(), 2, angle, (DS_RICE_S_RED) + ind % 8, 0);
+    Rebound(objBullet);
+  }
+  for (int angle = 20; angle <= 160; angle += 20) {
+    let objBullet = CreateShotA1(GetCenterX(), 2, 2, angle, DS_RICE_S_RED + ind % 8, 0);
+    Rebound(objBullet);
+  }
+  CreateShotA1(ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 2, GetAngleToPlayer(objBoss), DS_BALL_S_RED, 0);
+  for (int angle = 110; angle <= 250; angle += 20) {
+    let objBullet = CreateShotA1(GetStgFrameWidth() - 2, GetCenterY(), 2, angle, DS_RICE_S_RED + ind % 8, 0);
+    Rebound(objBullet);
+  }
+}
+
+
+task Rebound(bullet) {
+  if (Obj_GetValueD(bullet, "rebounded", false)) return;
+  while (!GetTouchedEdge(ObjMove_GetX(bullet), ObjMove_GetY(bullet))) yield;
+  let edgeID = GetTouchedEdge(ObjMove_GetX(bullet), ObjMove_GetY(bullet));
+  let curAngle = ObjMove_GetAngle(bullet);
+  if (edgeID <= 2) curAngle = 360 - curAngle; 
+  else curAngle = 180 - curAngle;
+  ObjMove_SetAngle(bullet, curAngle);
+  Obj_SetValue(bullet, "rebounded", true);
+}
+
+
+task TFinalize {
+  while (ObjEnemy_GetInfo(objBoss, INFO_LIFE) > 0) yield;
+  Obj_Delete(objBoss);
+  DeleteShotAll(TYPE_ALL, TYPE_IMMEDIATE);
+  SetAutoDeleteObject(true);
+  CloseScript(GetOwnScriptID());
+  return;
+}
+
+
+function GetTouchedEdge(x, y) {
+//  WriteLog("Checking touched edge: position is " ~ ToString(x) ~ ", " ~ ToString(y));
+  if (x <= 1) return 3; // left
+  else if (y <= 1) return 1; // top
+  else if (y >= GetStgFrameHeight() - 1) return 0; // bottom, change this value to 2 if you want to bounce at bottom also
+  else if (x >= GetStgFrameWidth() - 1) return 4; // right
+  else return 0; // not touched
+}
+
+
+function GetCenterX(){
+  return GetStgFrameWidth() / 2;
+}
+
+
+function GetCenterY(){
+  return GetStgFrameHeight() / 2;
+}
