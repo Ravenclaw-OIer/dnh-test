@@ -33,7 +33,7 @@ let frame = 0;
 
   TFinalize;
 }
-let p1, p2, lastx1, lastx2, lasty1, lasty2;
+let p1, p2;
 @MainLoop{
   ObjEnemy_SetIntersectionCircleToPlayer(objBoss, ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 24);
   ObjEnemy_SetIntersectionCircleToShot(objBoss, ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 32);
@@ -93,7 +93,7 @@ task TFire(p1, p2) {
     if (angle != 0) CreateShotA2(x1, y1, 1, aim1 + angle, 1, 5, DS_STAR_S_RED + (angle - 30) % 7, 0);
   }
   for (angle = -120; angle <= 120; angle += 30) {
-    if (angle != 0)CreateShotA2(x2, y2, 1, aim2 + angle, 1, 5, DS_STAR_S_RED + (angle - 30) % 7, 0);
+    if (angle != 0) CreateShotA2(x2, y2, 1, aim2 + angle, 1, 5, DS_STAR_S_RED + (angle - 30) % 7, 0);
   }
   if (frame % 60 == 0) {
     CreateShotA1(x1, y1, 1, aim1, DS_STAR_M_RED, 0);
