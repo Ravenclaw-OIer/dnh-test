@@ -33,7 +33,7 @@ let frame = 0;
 
   TFinalize;
 }
-let p1, p2;
+let p1, p2, lastx1, lastx2, lasty1, lasty2;
 @MainLoop{
   ObjEnemy_SetIntersectionCircleToPlayer(objBoss, ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 24);
   ObjEnemy_SetIntersectionCircleToShot(objBoss, ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 32);
@@ -41,11 +41,16 @@ let p1, p2;
     p1 = CreatePlanet(GetCenterX() - 72, GetCenterY());
     p2 = CreatePlanet(GetCenterX() + 144, GetCenterY());
   }
+  
   if (frame > 61) { // We have finished moving
     TMovePlanet(p1);
     TMovePlanet(p2);
-    TFire;
+    if (frame % 15 == 0) {    
+      TFire(p1, p2);
+    }
+  
   }
+  // DO NOT PUT OBJECT RELATED STATEMENT HERE!
   frame++;
   yield;
 }
@@ -55,6 +60,7 @@ function CreatePlanet(x, y) {
   const int X = GetCenterX(), Y = GetCenterY();
   let planet = CreateShotA1(x, y, 0, 0, DS_BALL_L_RED, 0); 
   Obj_SetValue(planet, "radius", sqrt((y - Y)^2 + (x - X)^2));
+  ObjShot_SetSpellResist(planet, true);
   return planet;
 }
 
@@ -79,8 +85,20 @@ task TMovePlanet(planet) {
 }
 
 
-task TFire {
-  
+task TFire(p1, p2) {
+  let x1 = ObjMove_GetX(p1), y1 = ObjMove_GetY(p1);
+  let x2 = ObjMove_GetX(p2), y2 = ObjMove_GetY(p2);
+  let aim1 = GetAngleToPlayer(p1), aim2 = GetAngleToPlayer(p2), angle;
+  for (angle = -120; angle <= 120; angle += 30) {
+    if (angle != 0) CreateShotA2(x1, y1, 1, aim1 + angle, 1, 5, DS_STAR_S_RED + (angle - 30) % 7, 0);
+  }
+  for (angle = -120; angle <= 120; angle += 30) {
+    if (angle != 0)CreateShotA2(x2, y2, 1, aim2 + angle, 1, 5, DS_STAR_S_RED + (angle - 30) % 7, 0);
+  }
+  if (frame % 60 == 0) {
+    CreateShotA1(x1, y1, 1, aim1, DS_STAR_M_RED, 0);
+    CreateShotA1(x2, y2, 1, aim2, DS_STAR_M_RED, 0);
+  }
 }
 
 
