@@ -67,6 +67,9 @@ function CreatePlanet(x, y) {
 
 task TMovePlanet(planet) {
   // get the angle between current position and origin
+  if (ObjEnemy_GetInfo(objBoss, INFO_LIFE) <= 0) {
+    return;
+  }
   let X = GetCenterX(), Y = GetCenterY(); // origin;
   let x = ObjMove_GetX(planet), y = ObjMove_GetY(planet);
   WriteLog(ToString(x) ~ "," ~ ToString(y));
@@ -86,6 +89,9 @@ task TMovePlanet(planet) {
 
 
 task TFire(p1, p2) {
+  if (ObjEnemy_GetInfo(objBoss, INFO_LIFE) <= 0) {
+    return;
+  }
   let x1 = ObjMove_GetX(p1), y1 = ObjMove_GetY(p1);
   let x2 = ObjMove_GetX(p2), y2 = ObjMove_GetY(p2);
   let aim1 = GetAngleToPlayer(p1), aim2 = GetAngleToPlayer(p2), angle;
