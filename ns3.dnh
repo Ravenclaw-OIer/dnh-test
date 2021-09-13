@@ -52,9 +52,7 @@ let ofs = 0;
 
 task TDraw(ofs) {
   // r =  cos (5/7 theta), theta in [0, 7pi]
-  if (ObjEnemy_GetInfo(objBoss, INFO_LIFE) <= 0) {
-    return;
-  }
+  if (ObjEnemy_GetInfo(objBoss, INFO_LIFE) <= 0) return;
   let theta;
   let bullets = [];
   for (theta = 0.0; theta < 7 * 180; theta += 10) {
