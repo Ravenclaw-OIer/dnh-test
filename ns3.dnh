@@ -30,7 +30,7 @@ let frame = 0;
   ObjPrim_SetTexture(objBoss, imgExRumia);
   ObjSprite2D_SetSourceRect(objBoss, 64, 1, 127, 64);
   ObjSprite2D_SetDestCenter(objBoss);
-  ObjMove_SetDestAtFrame(objBoss, GetCenterX(), 60, 60);
+  ObjMove_SetDestAtFrame(objBoss, GetCenterX(), GetCenterY(), 60);
 
   TFinalize;
 }
@@ -40,10 +40,15 @@ let ofs = 0;
   ObjEnemy_SetIntersectionCircleToShot(objBoss, ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 32);
 
   if (frame >= 60) { // We have finished moving
-     if (frame % 400 == 60) {
-       TDraw(ofs);
-       ofs++;
-     }
+    if (frame % 400 == 0) {
+      let dx = rand_int(-30, 30), x = ObjMove_GetX(objBoss);
+      let dy = rand_int(-30, 30), y = ObjMove_GetY(objBoss);
+      ObjMove_SetDestAtFrame(objBoss, x + dx, y + dy, 45);
+    }
+    if (frame % 400 == 60) {
+      TDraw(ofs);
+      ofs++;
+    }
   }
   frame++;
   yield;
@@ -58,7 +63,7 @@ task TDraw(ofs) {
   for (theta = 0.0; theta < 7 * 180; theta += 10) {
     let r = 150 * cos(5 / 7 * theta);
     let p = GetXYCoord(r, theta);
-    let objBullet = CreateShotA1(ObjDict_Get(p, "x") + GetCenterX(), ObjDict_Get(p, "y") + GetCenterY(), 
+    let objBullet = CreateShotA1(ObjDict_Get(p, "x") + ObjMove_GetX(objBoss), ObjDict_Get(p, "y") + ObjMove_GetY(objBoss), 
                                  0, rand_int(0, 360), DS_BUTTERFLY_RED + ofs % 8, 0);
     bullets = bullets ~ [objBullet];
     wait(1);
