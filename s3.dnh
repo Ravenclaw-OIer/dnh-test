@@ -10,7 +10,7 @@ let frame = 0;
 @Event{
   alternative (GetEventType())
     case (EV_REQUEST_LIFE) {
-      SetScriptResult(500);
+      SetScriptResult(5500);
     }
     case (EV_REQUEST_TIMER) {
       SetScriptResult(60);
@@ -53,9 +53,18 @@ task TFirst {
   }
    // first wave
   let bullets = [];
-  loop(15) {
-    let dx = rand_int(-150, 150), dy = rand_int(-150, 150);
-    let x = GetCenterX() + dx, y = GetCenterY() + dy;
+  loop(6) {
+    let x, y;
+    while (true) {
+      let dx = rand_int(-150, 150), dy = rand_int(-150, 150);
+      x = GetCenterX() + dx;
+      y = GetCenterY() + dy;
+      let flg = false;
+      for (int i = 0; i < length(bullets); i++) {
+        if (GetDist(x, y, bullets[i]) < 25) flg = true;
+      }
+      if (!flg) break;
+    }
     if (!IsTooNearPlayer(x, y)) {
       let objBullet = CreateShotA1(x, y, 0, 0, DS_BALL_L_RED, 0);
       bullets = bullets ~ [objBullet];
@@ -71,6 +80,9 @@ task TFirst {
 }
 
 
+function GetDist(x, y, obj) {
+  return sqrt((x - ObjMove_GetX(obj)) ^ 2 + (y - ObjMove_GetY(obj)) ^ 2);
+}
 
 task TSecond(objBullet) {
   // second wave
@@ -87,10 +99,11 @@ task TSecond(objBullet) {
   for each (let objBullet in bullets) {
     let angle = rand_int(0, 360);
     let x = ObjMove_GetX(objBullet), y = ObjMove_GetY(objBullet);
-    loop(15) {
-      CreateShotA1(x, y, 2, angle, DS_BUTTERFLY_GREEN, 0);
-      angle = (angle + 24) % 360;
+    loop(4) {
+      CreateShotA1(x, y, 1, angle, DS_BUTTERFLY_GREEN, 0);
+      angle = (angle + 90) % 360;
     }
+//    CreateShotA1(x, y, 2, GetAngleToPlayer(objBullet), DS_BUTTERFLY_GREEN, 0);
     Obj_Delete(objBullet);
   }
 }
