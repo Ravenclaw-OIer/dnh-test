@@ -76,8 +76,8 @@ task TSecond(objBullet) {
   // second wave
   let bullets = [];
   let x = ObjMove_GetX(objBullet), y = ObjMove_GetY(objBullet);
-  for (let angle = 0; angle <= 360; angle += 30) {
-    let dx = 15 * cos(angle), dy = 15 * sin(angle);
+  for (let angle = 0; angle <= 360; angle += 60) {
+    let dx = 45 * cos(angle), dy = 45 * sin(angle);
     if (!IsTooNearPlayer(dx + x, dy + y)) {
       let childBullet = CreateShotA1(dx + x, dy + y, 0, 0, DS_BALL_M_RED, 0);
       bullets = bullets ~ [childBullet];
@@ -88,7 +88,7 @@ task TSecond(objBullet) {
     let angle = rand_int(0, 360);
     let x = ObjMove_GetX(objBullet), y = ObjMove_GetY(objBullet);
     loop(15) {
-      CreateShotA1(x, y, 2, angle, DS_BUTTERFLY_R_GREEN, 0);
+      CreateShotA1(x, y, 2, angle, DS_BUTTERFLY_GREEN, 0);
       angle = (angle + 24) % 360;
     }
     Obj_Delete(objBullet);
