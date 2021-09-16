@@ -10,7 +10,7 @@ let frame = 0;
 @Event{
   alternative (GetEventType())
     case (EV_REQUEST_LIFE) {
-      SetScriptResult(8500);
+      SetScriptResult(5500);
     }
     case (EV_REQUEST_TIMER) {
       SetScriptResult(60);
