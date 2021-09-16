@@ -95,17 +95,26 @@ task TSecond(objBullet) {
       bullets = bullets ~ [childBullet];
     }
   }
+  
   wait(60);
   for each (let objBullet in bullets) {
-    let angle = rand_int(0, 360);
+    let angle = rand_int(-20, 20);
     let x = ObjMove_GetX(objBullet), y = ObjMove_GetY(objBullet);
     loop(4) {
       CreateShotA1(x, y, 1, angle, DS_BUTTERFLY_GREEN, 0);
       angle = (angle + 90) % 360;
     }
-//    CreateShotA1(x, y, 2, GetAngleToPlayer(objBullet), DS_BUTTERFLY_GREEN, 0);
+    let obj = CreateShotA1(x, y, 2, GetAngleToPlayer(objBullet), DS_BUTTERFLY_PURPLE, 0);
+    TDelay(obj, 3);
     Obj_Delete(objBullet);
   }
+}
+
+task TDelay(objBullet, cnt) {
+  if (cnt <= 0) return;
+  wait(60);
+  ObjMove_SetAngle(objBullet, GetAngleToPlayer(objBullet) + rand_int(-5, 5));
+  TDelay(objBullet, cnt - 1);
 }
 
 
