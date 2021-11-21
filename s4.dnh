@@ -1,0 +1,154 @@
+#TouhouDanmakufu[Single]
+#ScriptVersion[3]
+#Title["Spellcard 4"]
+#Text["Dawn [The girl gazing at the sky]"]
+#include "script/default_system/Default_ShotConst.txt"
+let objBoss;
+let frame = 0;
+let objScene = GetEnemyBossSceneObjectID();
+
+@Event{
+  alternative (GetEventType())
+    case (EV_REQUEST_LIFE) {
+      SetScriptResult(500);
+    }
+    case (EV_REQUEST_TIMER) {
+      SetScriptResult(60);
+    }
+    case (EV_REQUEST_SPELL_SCORE) {
+      SetScriptResult(1000000);
+    }
+
+}
+
+
+@Initialize{
+  objBoss = ObjEnemy_Create(OBJ_ENEMY_BOSS);
+  ObjEnemy_Regist(objBoss);
+  ObjEnemyBossScene_StartSpell(objScene);
+  ObjMove_SetDestAtFrame(objBoss, GetCenterX(), 60, 60);
+  TDrawLoop;
+  TFinalize;
+}
+
+task TDrawLoop {
+  let imgExRumia = GetCurrentScriptDirectory() ~ "ExRumia.png";
+  ObjPrim_SetTexture(objBoss, imgExRumia);
+  ObjSprite2D_SetSourceRect(objBoss, 64, 1, 127, 64);
+  ObjSprite2D_SetDestCenter(objBoss);
+}
+int s = 0, cnt  = 0;
+@MainLoop{
+//  survival, no hitbox
+//  ObjEnemy_SetIntersectionCircleToPlayer(objBoss, ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 24);
+//  ObjEnemy_SetIntersectionCircleToShot(objBoss, ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 32);
+  if (frame > 60) { // We have finished moving
+    if (frame % (300 - s * 2) == 70) {
+      TCreateShot;
+      s += 3;
+    }
+  }
+  frame++;
+  yield;
+}
+
+
+task TCreateShot {  
+  // from up
+  let w = GetStgFrameWidth() - 1, h = GetStgFrameHeight() - 1;
+  int cnt = 0;
+  let bullets = [];
+  for (int y = h; y >= 1; y -= 30) {
+    let shot1 = CreateShotA1(2, y, 0, 0, DS_STAR_S_RED + (cnt % 8), 0);
+    wait(2);
+    bullets = bullets ~ [shot1];
+    cnt++;
+  }
+  for (int x = 1; x <= w; x += 30) {
+    let shot1 = CreateShotA1(x, 2, 0, 0, DS_STAR_S_RED + (cnt % 8), 0);
+    wait(2);
+    bullets = bullets ~ [shot1];
+    cnt++;
+  }
+  for (int y = 1; y <= h; y += 30) {
+    let shot2 = CreateShotA1(w - 2, y, 0, 0, DS_STAR_S_RED + (cnt % 8), 0);
+    wait(2);
+   bullets = bullets ~ [shot2];
+    cnt++;
+  }
+  for (int x = w; x >= 1; x -= 40) {
+    let shot2 = CreateShotA1(x, h - 2, 0, 0, DS_STAR_S_RED + (cnt % 8), 0);
+    wait(2);
+    bullets = bullets ~ [shot2];
+    cnt++;
+  }
+  for each (bullet in bullets) TMove(bullet);
+}
+
+task TMove(objBullet) {
+  while (!((GetCenterX() <= ObjMove_GetX(objBullet) + 5)  && (GetCenterX() >= ObjMove_GetX(objBullet) - 5) && 
+           (GetCenterY() <= ObjMove_GetY(objBullet) + 5)  && (GetCenterY() >= ObjMove_GetY(objBullet) - 5))) {  
+    if (GetDist(objBullet, GetPlayerObjectID()) <= 10250) {
+      ObjMove_SetSpeed(objBullet, 0);
+      let x = ObjMove_GetX(objBullet);
+      let y = ObjMove_GetY(objBullet);
+      let angle = GetAngleToPlayer(objBullet);
+      Obj_Delete(objBullet);
+      for (int tot = 0; tot <= 3; tot++) {  
+        angle += 120;
+        let shot = CreateShotA1(x, y, 0, 0, DS_BUTTERFLY_RED + cnt % 8, 0);
+        TMove2(shot, angle + rand(-20, 20));
+        cnt++;
+      }
+      return;
+    }
+    ObjMove_SetSpeed(objBullet, 1 + s * 0.03);
+    let angle = atan2(GetCenterY() - ObjMove_GetY(objBullet), GetCenterX() - ObjMove_GetX(objBullet));
+    ObjMove_SetAngle(objBullet, angle + 10);
+    yield;
+  }
+  Obj_Delete(objBullet);
+  return;
+}
+
+
+task TMove2(objBullet, destAngle) {
+  wait(180);
+  ObjMove_SetSpeed(objBullet, 1 + s * 0.03);
+  ObjMove_SetAngle(objBullet, destAngle);
+}
+
+
+function GetDist(obj1, obj2) {
+  return (ObjMove_GetX(obj1) - ObjMove_GetX(obj2)) * (ObjMove_GetX(obj1) - ObjMove_GetX(obj2))  
+  + (ObjMove_GetY(obj1) - ObjMove_GetY(obj2)) * (ObjMove_GetY(obj1) - ObjMove_GetY(obj2)) ;
+}
+
+task TFinalize {
+  while (ObjEnemy_GetInfo(objBoss, INFO_LIFE) > 0) yield;
+  Obj_Delete(objBoss);
+  DeleteShotAll(TYPE_ALL, TYPE_IMMEDIATE);
+  SetAutoDeleteObject(true);
+  CloseScript(GetOwnScriptID());
+  return;
+}
+
+
+function GetTouchedEdge(x, y) {
+//  WriteLog("Checking touched edge: position is " ~ ToString(x) ~ ", " ~ ToString(y));
+  if (x <= 1) return 3; // left
+  else if (y <= 1) return 1; // top
+  else if (y >= GetStgFrameHeight() - 1) return 0; // bottom, change this value to 2 if you want to bounce at bottom also
+  else if (x >= GetStgFrameWidth() - 1) return 4; // right
+  else return 0; // not touched
+}
+
+
+function GetCenterX(){
+  return GetStgFrameWidth() / 2;
+}
+
+
+function GetCenterY(){
+  return GetStgFrameHeight() / 2;
+}
