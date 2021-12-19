@@ -1,11 +1,11 @@
 #TouhouDanmakufu[Single]
 #ScriptVersion[3]
-#Title["Nonspell 1"]
-#Text["Nonspell 1"]
+#Title["Spellcard 4"]
+#Text["Dawn [The girl gazing at the sky]"]
 #include "script/default_system/Default_ShotConst.txt"
 let objBoss;
 let frame = 0;
-
+let objScene = GetEnemyBossSceneObjectID();
 
 @Event{
   alternative (GetEventType())
@@ -25,27 +25,28 @@ let frame = 0;
 @Initialize{
   objBoss = ObjEnemy_Create(OBJ_ENEMY_BOSS);
   ObjEnemy_Regist(objBoss);
+  ObjEnemyBossScene_StartSpell(objScene);
+  ObjMove_SetDestAtFrame(objBoss, GetCenterX(), 60, 60);
+  TDrawLoop;
+  TFinalize;
+}
+
+task TDrawLoop {
   let imgExRumia = GetCurrentScriptDirectory() ~ "ExRumia.png";
   ObjPrim_SetTexture(objBoss, imgExRumia);
   ObjSprite2D_SetSourceRect(objBoss, 64, 1, 127, 64);
   ObjSprite2D_SetDestCenter(objBoss);
-  ObjMove_SetDestAtFrame(objBoss, GetCenterX(), 60, 60);
-
-  TFinalize;
 }
 
 @MainLoop{
-  ObjEnemy_SetIntersectionCircleToPlayer(objBoss, ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 24);
-  ObjEnemy_SetIntersectionCircleToShot(objBoss, ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 32);
-
+ObjEnemy_SetIntersectionCircleToPlayer(objBoss, ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 24);
+ObjEnemy_SetIntersectionCircleToShot(objBoss, ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 32);
   if (frame > 60) { // We have finished moving
-
+    
   }
   frame++;
   yield;
 }
-
-
 
 
 task TFinalize {

@@ -4,13 +4,14 @@
 #Text["Spell 1"]
 #include "script/default_system/Default_ShotConst.txt"
 let objBoss;
+let objScene = GetEnemyBossSceneObjectID();
 let frame = 0;
 
 
 @Event{
   alternative (GetEventType())
     case (EV_REQUEST_LIFE) {
-      SetScriptResult(3200);
+      SetScriptResult(250);
     }
     case (EV_REQUEST_TIMER) {
       SetScriptResult(60);
@@ -25,20 +26,26 @@ let frame = 0;
 @Initialize{
   objBoss = ObjEnemy_Create(OBJ_ENEMY_BOSS);
   ObjEnemy_Regist(objBoss);
+  ObjMove_SetDestAtFrame(objBoss, GetCenterX(), 60, 60);
+  ObjEnemyBossScene_StartSpell(objScene);
+  TDrawLoop;
+  TFinalize;
+}
+
+task TDrawLoop {
   let imgExRumia = GetCurrentScriptDirectory() ~ "ExRumia.png";
   ObjPrim_SetTexture(objBoss, imgExRumia);
   ObjSprite2D_SetSourceRect(objBoss, 64, 1, 127, 64);
   ObjSprite2D_SetDestCenter(objBoss);
-  ObjMove_SetDestAtFrame(objBoss, GetCenterX(), 60, 60);
-
-  TFinalize;
 }
 
 int ind = 0;
 @MainLoop{
-  ObjEnemy_SetIntersectionCircleToPlayer(objBoss, ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 24);
-  ObjEnemy_SetIntersectionCircleToShot(objBoss, ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 32);
-
+  if (frame > 300) {
+    ObjEnemy_SetIntersectionCircleToPlayer(objBoss, ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 24);
+    ObjEnemy_SetIntersectionCircleToShot(objBoss, ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 32);
+  }
+  ObjEnemy_SetDamageRate(objBoss, 10, 20);
   if (frame > 60) { // We have finished moving
     if (frame % 15 == 0) {
       if (frame % 600 != 0)
@@ -88,6 +95,10 @@ task TRebound(bullet) {
 
 task TFinalize {
   while (ObjEnemy_GetInfo(objBoss, INFO_LIFE) > 0) yield;
+  if(ObjEnemyBossScene_GetInfo(objScene, INFO_PLAYER_SHOOTDOWN_COUNT)
+        + ObjEnemyBossScene_GetInfo(objScene, INFO_PLAYER_SPELL_COUNT) == 0) {
+    AddScore(ObjEnemyBossScene_GetInfo(objScene, INFO_SPELL_SCORE));
+  }
   Obj_Delete(objBoss);
   DeleteShotAll(TYPE_ALL, TYPE_IMMEDIATE);
   SetAutoDeleteObject(true);
