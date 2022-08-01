@@ -1,0 +1,17 @@
+
+sanae normal: "哇～～，好久没看到过外界来的人了。现在的外界怎么样了？"
+chun sad: "你问我，我又问谁呢？我在外界早已被忘却多年，以至于堕入这个充满妖术的世界了。"
+sanae questioning: 
+!ns1
+!s1
+!ns2
+!s2
+!ns3
+!s3
+chun stern: "觉得美吗？"
+chun stern: "觉得美就写写吧"
+chun stern: "这才是科学的力量，尔等魑魅魍魉，又如何能够理解！"
+!ns4
+!s4
+!s5
+!s6

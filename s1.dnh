@@ -28,6 +28,7 @@ let frame = 0;
   ObjEnemy_Regist(objBoss);
   ObjMove_SetDestAtFrame(objBoss, GetCenterX(), 60, 60);
   ObjEnemyBossScene_StartSpell(objScene);
+  NotifyEventAll(EV_USER + 1, ["理想「绝对光滑的平面」", "周春"]); 
   TDrawLoop;
   TFinalize;
 }

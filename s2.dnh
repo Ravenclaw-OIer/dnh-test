@@ -30,7 +30,7 @@ let frame = 0;
   ObjSprite2D_SetSourceRect(objBoss, 64, 1, 127, 64);
   ObjSprite2D_SetDestCenter(objBoss);
   ObjMove_SetDestAtFrame(objBoss, GetCenterX(), 60, 60);
-
+    NotifyEventAll(EV_USER + 1, ["星符「万有引力」", "周春"]); 
   TFinalize;
 }
 let p1, p2;

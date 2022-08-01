@@ -1,0 +1,34 @@
+#TouhouDanmakufu[Plural]
+#ScriptVersion[3]
+#Title["Fantastic Physical World"]
+#Text["Test"] 
+#System["./system/Default_System.dnh"]
+@Event {
+
+}
+@Initialize {
+  TPlural;
+}
+@MainLoop {
+  yield;
+}
+task TPlural {
+  let dir = GetCurrentScriptDirectory();
+  let obj = ObjEnemyBossScene_Create();
+  ObjEnemyBossScene_Add(obj, 0, dir ~ "./ns1.dnh");
+  ObjEnemyBossScene_Add(obj, 0, dir ~ "./s1.dnh");
+  ObjEnemyBossScene_Add(obj, 1, dir ~ "./ns2.dnh");
+  ObjEnemyBossScene_Add(obj, 1, dir ~ "./s2.dnh");
+//  ObjEnemyBossScene_Add(obj, 2, dir ~ "./ns3.dnh");
+  ObjEnemyBossScene_Add(obj, 2, dir ~ "./s3.dnh");
+  ObjEnemyBossScene_Add(obj, 3, dir ~ "./s4.dnh");  
+  ObjEnemyBossScene_Add(obj, 4, dir ~ "./s5.dnh");  
+  ObjEnemyBossScene_Add(obj, 5, dir ~ "./s6.dnh"); 
+  ObjEnemyBossScene_Add(obj, 6, dir ~ "./s7.dnh");
+  ObjEnemyBossScene_LoadInThread(obj);
+  ObjEnemyBossScene_Regist(obj);
+  while(!Obj_IsDeleted(obj)){
+    yield;
+  }
+  CloseScript(GetOwnScriptID());
+}

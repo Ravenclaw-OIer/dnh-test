@@ -1,7 +1,7 @@
 #TouhouDanmakufu[Single]
 #ScriptVersion[3]
-#Title["Spellcard 5"]
-#Text["Prosperity [The girl in the scientific era]"]
+#Title["Spellcard 6"]
+#Text["Dusk [The girl in the magical era]"]
 #include "script/default_system/Default_ShotConst.txt"
 let objBoss;
 let frame = 0;
@@ -10,10 +10,10 @@ let objScene = GetEnemyBossSceneObjectID();
 @Event{
   alternative (GetEventType())
     case (EV_REQUEST_LIFE) {
-      SetScriptResult(1500);
+      SetScriptResult(2000);
     }
     case (EV_REQUEST_TIMER) {
-      SetScriptResult(120);
+      SetScriptResult(60);
     }
     case (EV_REQUEST_SPELL_SCORE) {
       SetScriptResult(1000000);
@@ -27,7 +27,6 @@ let objScene = GetEnemyBossSceneObjectID();
   ObjEnemy_Regist(objBoss);
   ObjEnemyBossScene_StartSpell(objScene);
   ObjMove_SetDestAtFrame(objBoss, GetCenterX(), 60, 60);
-  NotifyEventAll(EV_USER + 1, ["繁荣「科学时代的少女」", "周春"]);   
   TDrawLoop;
   TFinalize;
 }
@@ -39,6 +38,7 @@ task TDrawLoop {
   ObjSprite2D_SetDestCenter(objBoss);
 }
 
+int cnt = 0;
 @MainLoop{
   ObjEnemy_SetIntersectionCircleToPlayer(objBoss, ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 24);
   ObjEnemy_SetIntersectionCircleToShot(objBoss, ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 32);
@@ -46,6 +46,7 @@ task TDrawLoop {
   if (frame > 60) { // We have finished moving
     if (frame % 300 == 61) {
       TCreateSquares;
+	  cnt++;
     }
   }
   frame++;
@@ -54,38 +55,28 @@ task TDrawLoop {
 
 task TCreateSquare(X, Y, color, direction) {
   const dx = [-30, 0, 30], dy = [-30, 0, 30];
+  let shots = [];
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       if (i == 1 && j == 1) continue;
-      let dirofs = 0;
-      if (GetCurrentSpellcardStage() >= 2) dirofs = rand(-20, 20);
-      let shot = CreateShotA1(X + dx[i], Y + dy[j], 0, direction * 90 + dirofs, color, 0);
-      let ofs = 0, mul = 1;
-      if (GetCurrentSpellcardStage() >= 1) ofs = rand(-0.2, 0.2);
-      if (GetCurrentSpellcardStage() >= 3) {
-        let hp = ObjEnemy_GetInfo(objBoss, INFO_LIFE);
-        let alpha = ((600 - hp) / 500 + 0.8);
-        ofs = rand(-1 * alpha, 1 * (600 - hp) / 500);
-        if (GetCurrentSpellcardStage() == 4) {
-          mul = 3;
-          CreateShotA1(ObjMove_GetX(objBoss), ObjMove_GetY(objBoss), 2, GetAngleToPlayer(objBoss), DS_BALL_S_RED, 0);
-        } else mul = 2;
-      }
-      ObjMove_AddPatternA1(shot, 60, ofs + mul, NO_CHANGE);
+      let shot = CreateShotA1(X + dx[i], Y + dy[j], 0, direction * 90, color, 0);
+      ObjMove_AddPatternA1(shot, 60, 1, NO_CHANGE);
+      shots ~= [shot];
     }
   }
+  TTransformSquare(shots);
 }
 
-function<int> GetCurrentSpellcardStage() {
-  const maxtime = 120, maxhp = 1500;
-  let time = ObjEnemyBossScene_GetInfo(objScene, INFO_TIMER);
-  let hp = ObjEnemy_GetInfo(objBoss, INFO_LIFE);
-  if (time <= 0.15 * maxtime) return 4;  // penalty
-  if (hp <= 0.3 * maxhp) return 3;
-  if (hp <= 0.5 * maxhp) return 2;
-  if (hp <= 0.7 * maxhp) return 1; 
-  
-  else return 0;
+
+task TTransformSquare(square) {
+  wait(240);
+  for each (shot in square) {
+    let x = ObjMove_GetX(shot), y = ObjMove_GetY(shot), dir = ObjMove_GetAngle(shot), speed = ObjMove_GetSpeed(shot);
+	  Obj_Delete(shot);
+	  let star = CreateShotA1(x, y, 0, dir, DS_STAR_S_RED + cnt % 8, 0);
+    ObjMove_AddPatternA1(star, 60, rand_int(1, 3), rand_int(0, 360));
+    ObjMove_AddPatternA3(star, 120, NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE, NO_CHANGE, DS_BUTTERFLY_RED + cnt % 8);
+  }
 }
 
 task TCreateSquares {
